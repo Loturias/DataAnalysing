@@ -7,5 +7,5 @@ LogType = {
 }
 
 
-def Print(Info,Type):
+def Print(Info, Type=0):
     print('['+LogType[Type]+']'+" "+Info)
