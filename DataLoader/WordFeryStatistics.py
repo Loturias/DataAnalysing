@@ -3,6 +3,7 @@
 
 import DataLoader as DL
 import LogSys.LogSys as Log
+import json
 
 words = {}
 read = DL.CSVReader("Data\\train.csv")
@@ -53,5 +54,7 @@ for key in ValidWord:
     ValidLis.append({key: [ValidWord[key], WordCount]})
     WordCount = WordCount + 1
 
-print(ValidLis)
+# print(ValidLis)
 # Train Data's valid word count:12271
+
+json.dump(obj=ValidLis, fp=open("WordLib.json", 'w'))
