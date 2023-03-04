@@ -2,9 +2,10 @@
 # One-Time script!
 
 import DataLoader as DL
+import LogSys.LogSys as Log
 
 words = {}
-read = DL.CSVReader("Data\\test.csv")
+read = DL.CSVReader("Data\\train.csv")
 wordcount = 0
 
 
@@ -25,12 +26,31 @@ for line in read.reader:
                 if CheckBlank(text):
                     wordtemp = text.split(" ")  # Finally,cut by " "
                     for word in wordtemp:
-                        if CheckBlank(word):
-                            low = word.lower()
-                            if low not in words:
-                                words[low] = 0
-                                wordcount = wordcount + 1
-                            else:
-                                words[low] = words[low] + 1
+                        intemp = word.split("聽")  # Add a more filter to remove the NBSP character
+                        for ins in intemp:
+                            if CheckBlank(ins):
+                                low = ins.lower()
+                                if ins not in words:
+                                    words[low] = 1
+                                    wordcount = wordcount + 1
+                                else:
+                                    words[low] = words[low] + 1
 
-print("Count Complete.Word count:"+str(wordcount))
+Log.Print("Count Complete.Word count:"+str(wordcount))
+ValidWord = {}
+for key in words:
+    if words[key] != 1 or key.isalpha() or ("-" in key.strip("-")):
+        ValidWord[key] = words[key]
+    # else:
+    #     InWord[key] = words[key]
+Log.Print("Valid word count: "+str(len(ValidWord)))
+ValidLis = []
+for key in ValidWord:
+    ValidLis.append((key, ValidWord[key]))
+
+
+ValidLis.sort(key=lambda lis: lis[1], reverse=True)
+ValidLis.remove(('"', 2471))
+ValidLis.remove(('\n', 2088))
+print(ValidLis)
+# Train Data's valid word count:29803
