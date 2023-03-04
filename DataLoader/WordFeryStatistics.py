@@ -8,6 +8,7 @@ words = {}
 read = DL.CSVReader("Data\\train.csv")
 wordcount = 0
 
+wordNum = 1
 
 def CheckBlank(strs):
     if strs == "" or strs == " ":
@@ -39,18 +40,18 @@ for line in read.reader:
 Log.Print("Count Complete.Word count:"+str(wordcount))
 ValidWord = {}
 for key in words:
-    if words[key] != 1 or key.isalpha() or ("-" in key.strip("-")):
+    if (key.isalpha() or ("-" in key.strip("-"))) and words[key] > 1:
         ValidWord[key] = words[key]
     # else:
     #     InWord[key] = words[key]
 Log.Print("Valid word count: "+str(len(ValidWord)))
+
+
 ValidLis = []
+WordCount = 0
 for key in ValidWord:
-    ValidLis.append((key, ValidWord[key]))
+    ValidLis.append({key: [ValidWord[key], WordCount]})
+    WordCount = WordCount + 1
 
-
-ValidLis.sort(key=lambda lis: lis[1], reverse=True)
-ValidLis.remove(('"', 2471))
-ValidLis.remove(('\n', 2088))
 print(ValidLis)
-# Train Data's valid word count:29803
+# Train Data's valid word count:12271
