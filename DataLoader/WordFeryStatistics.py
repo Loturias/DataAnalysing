@@ -51,13 +51,13 @@ for key in words:
 Log.Print("Valid word count: "+str(len(ValidWord)))
 
 
-ValidLis = []
-WordCount = 0
+ValidLis = {}
+WordCount = 1
 for key in ValidWord:
-    ValidLis.append({key: [ValidWord[key], WordCount]})
+    ValidLis[key] = [ValidWord[key], WordCount]
     WordCount = WordCount + 1
-print(sentCount)
 # print(ValidLis)
 # Train Data's valid word count:11783
 
 json.dump(obj=ValidLis, fp=open("WordLib.json", 'w'))
+Log.Print("Dictionary Saved")
