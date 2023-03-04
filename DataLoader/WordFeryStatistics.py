@@ -10,7 +10,7 @@ read = DL.CSVReader("Data\\train.csv")
 wordcount = 0
 
 wordNum = 1
-
+sentCount = 0
 def CheckBlank(strs):
     if strs == "" or strs == " ":
         return False
@@ -20,6 +20,8 @@ def CheckBlank(strs):
 
 for line in read.reader:
     texttemp = line[2]  # Get the text of this row
+    if "." not in texttemp:
+        continue
     sequtemp = texttemp.split(".")  # Cut by "."
     for sequ in sequtemp:
         if CheckBlank(sequ):
@@ -27,6 +29,7 @@ for line in read.reader:
             for text in texttemp:
                 if CheckBlank(text):
                     wordtemp = text.split(" ")  # Finally,cut by " "
+                    # sentCount = max(sentCount, len(wordtemp))
                     for word in wordtemp:
                         intemp = word.split("聽")  # Add a more filter to remove the NBSP character
                         for ins in intemp:
@@ -53,8 +56,8 @@ WordCount = 0
 for key in ValidWord:
     ValidLis.append({key: [ValidWord[key], WordCount]})
     WordCount = WordCount + 1
-
+print(sentCount)
 # print(ValidLis)
-# Train Data's valid word count:12271
+# Train Data's valid word count:11783
 
 json.dump(obj=ValidLis, fp=open("WordLib.json", 'w'))
