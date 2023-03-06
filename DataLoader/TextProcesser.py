@@ -11,6 +11,7 @@ Cour_Eff = {"Effective": 0, "Adequate": 1, "Ineffective": 2}
 TextType = {'Lead': 0, 'Position': 1, 'Claim': 2, 'Evidence': 3,
             'Counterclaim': 4, 'Rebuttal': 5, 'Concluding Statement': 6}
 
+chr_dict = [chr(i) for i in range(ord('a'), ord('z') + 1)]
 class TSetApp:
     def __init__(self, WordLib):
         self.BatchTextSize = 32   # The biggest size of a batch(count by raw text)
@@ -56,12 +57,27 @@ class TSetApp:
 
         return Batch
 
+    # Return a vector composed by word's raw code(Need processed by embedding layer
+    def GetTextBatch(self):
+        row = (next(self.reader.reader))
+        text = row[2]
+        texttype = row[3]
+        texttype = Cour_Eff[row[4]]  # 0,1,2
+        TextVec = []  # With variable length
+
+        RawTextVec = text.lower().replace("聽", " ").strip(".").strip(",").split(" ")  # Remove the invalid char
+        for word in RawTextVec:
+            if word in self.wordlib:
+                TextVec.append(self.wordlib[word][1])
+
+        return TextVec
+
 
 # Test code
 
 # lib = json.load(open("WordLib.json", "r"))
 # test = TSetApp(lib)
-# for i in range(100):
-#     batch = test.GetEmbedBatch()
-
+# for i in range(10):
+#     batch = test.GetTextBatch()
+#    print(batch)
 
