@@ -1,7 +1,7 @@
 # Text processer
 
 
-import DataLoader as dL
+import DataLoader.DataLoad as dL
 import LogSys.LogSys as Log
 import json
 
@@ -13,10 +13,11 @@ TextType = {'Lead': 0, 'Position': 1, 'Claim': 2, 'Evidence': 3,
 
 chr_dict = [chr(i) for i in range(ord('a'), ord('z') + 1)]
 class TSetApp:
-    def __init__(self, WordLib):
+    def __init__(self, WordLib, filepath):
         self.BatchTextSize = 32   # The biggest size of a batch(count by raw text)
         self.squeMaxLen = 64  # The biggest sentence length indata
-        self.filepath = "Data\\train.csv"
+        self.textMaxLen = 200
+        self.filepath = filepath
         self.reader = dL.CSVReader(self.filepath)
         self.wordlib = WordLib
 
@@ -63,13 +64,17 @@ class TSetApp:
         text = row[2]
         texttype = row[3]
         texttype = Cour_Eff[row[4]]  # 0,1,2
-        TextVec = []  # With variable length
+        TextVec = [0 for i in range(self.textMaxLen)]  # Set the max length to 200
+        count = 0
 
-        RawTextVec = text.lower().replace("聽", " ").strip(".").strip(",").split(" ")  # Remove the invalid char
+        RawTextVec = text.lower().replace("聽", " ").split(" ")  # Remove the invalid char
         for word in RawTextVec:
-            if word in self.wordlib:
-                TextVec.append(self.wordlib[word][1])
-
+            proword = word.strip(".").strip(",")
+            if count >= 200:
+                break
+            if proword in self.wordlib:
+                TextVec[count] = self.wordlib[proword][1]
+                count = count + 1
         return TextVec
 
 

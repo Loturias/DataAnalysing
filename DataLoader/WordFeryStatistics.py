@@ -1,7 +1,7 @@
 # For Word frequency statistics
 # One-Time script!
 
-import DataLoader as DL
+import DataLoad as DL
 import LogSys.LogSys as Log
 import json
 
@@ -58,7 +58,7 @@ for key in words:
     #     InWord[key] = words[key]
 Log.Print("Valid word count: "+str(len(ValidWord)))
 
-Log.Print("Valic text type count: " + str(typecount))
+Log.Print("Valid text type count: " + str(typecount))
 print(type_dict)
 
 ValidLis = {}
