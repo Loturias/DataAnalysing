@@ -18,8 +18,16 @@ def CheckBlank(strs):
         return True
 
 
+type_dict = {}
+typecount = 0
+
+# Generate the dictionary
 for line in read.reader:
     texttemp = line[2]  # Get the text of this row
+    texttype = line[3]
+    if texttype not in type_dict:
+        type_dict[texttype] = typecount
+        typecount = typecount + 1
     if "." not in texttemp:
         continue
     sequtemp = texttemp.split(".")  # Cut by "."
@@ -50,6 +58,8 @@ for key in words:
     #     InWord[key] = words[key]
 Log.Print("Valid word count: "+str(len(ValidWord)))
 
+Log.Print("Valic text type count: " + str(typecount))
+print(type_dict)
 
 ValidLis = {}
 WordCount = 1

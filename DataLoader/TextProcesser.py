@@ -5,6 +5,12 @@ import DataLoader as dL
 import LogSys.LogSys as Log
 import json
 
+Cour_Eff = {"Effective": 0, "Adequate": 1, "Ineffective": 2}
+
+# Hard coded here!
+TextType = {'Lead': 0, 'Position': 1, 'Claim': 2, 'Evidence': 3,
+            'Counterclaim': 4, 'Rebuttal': 5, 'Concluding Statement': 6}
+
 class TSetApp:
     def __init__(self, WordLib):
         self.BatchTextSize = 32   # The biggest size of a batch(count by raw text)
@@ -25,6 +31,7 @@ class TSetApp:
                 try:
                     rawseq[count] = self.wordlib[proword][1]
                 except:
+                    Log.Print("Buffer Overflow.Surplus data is discarded")
                     return []  # Throw sentences longer than 64
                 count = count + 1
         return rawseq
