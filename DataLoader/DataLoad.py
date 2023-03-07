@@ -19,6 +19,7 @@ class CSVReader:
         self.file.seek(0)
         res = sum(1 for _ in enumerate(self.reader)) - 1
         self.file.seek(0)
+        next(self.reader)  # 重置索引到第一行
         return res
 # Test code
 
