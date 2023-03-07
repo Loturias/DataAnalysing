@@ -5,6 +5,7 @@ import os
 import LogSys.LogSys as LogSys
 import json
 import DataLoader.TextProcesser as TAPP
+import numpy as np
 
 # 初始化PyTorch框架
 LogSys.Print("Initializing PyTorch...")
@@ -15,6 +16,7 @@ LogSys.Print("PyTorch Version: " + torch.__version__)
 LogSys.Print("CUDA Version: " + torch.version.cuda)
 LogSys.Print("Is CUDA available: " + str(torch.cuda.is_available()))
 LogSys.Print("GPU Device Info: " + torch.cuda.get_device_name(0))
+torch.device = "cuda"
 
 # 载入词典
 fil = open(r"DataLoader\WordLib.json", "r")
@@ -23,6 +25,15 @@ WordLib = json.load(fil)
 # 创建训练集管理器
 Set = TAPP.TSetApp(WordLib, r"DataLoader\Data\train.csv")
 
+
+def setup_seed(seed):
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    np.random.seed(seed)
+
+
+# 设置随机数种子，先辈保佑我准确率呀！
+setup_seed(114514)
 
 # Model definition
 class TextClassifierRNN(nn.Module):
@@ -49,9 +60,15 @@ class TextClassifierRNN(nn.Module):
     def forward(self, tem):
         # 生成一个Batch
         data = []
+        FinalEval = []
+        smax = nn.Softmax(dim=1)
+
         for i in range(self.batchsize):
-            temp = Set.GetTextBatch()
+            temp, Eval = Set.GetTextBatch()
             data.append(temp)
+            Evals = [0, 0, 0]
+            Evals[Eval] = 1
+            FinalEval.append(Evals)
 
         dataTen = torch.LongTensor(data)
 
@@ -65,9 +82,13 @@ class TextClassifierRNN(nn.Module):
         # 把维度拍到10*12800
         xoutput = output.flatten(1, 2)
 
-        FinalOutput = self.out(xoutput)  # 变成了10*200*7
-        print(FinalOutput)
-        return FinalOutput
+        # 喂给线性层出来10*7的结果，再过一遍Softmax函数归一化
+        FinalOutput = smax(self.out(xoutput))  # 变成了10*7
 
+        print(FinalOutput)
+        print(FinalEval)
+        return FinalOutput, FinalEval
+
+# 创建模型
 test = TextClassifierRNN()
-test.forward(114514)
+

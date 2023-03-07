@@ -62,8 +62,7 @@ class TSetApp:
     def GetTextBatch(self):
         row = (next(self.reader.reader))
         text = row[2]
-        texttype = row[3]
-        texttype = Cour_Eff[row[4]]  # 0,1,2
+        texteval = Cour_Eff[row[4]]  # 0,1,2
         TextVec = [0 for i in range(self.textMaxLen)]  # Set the max length to 200
         count = 0
 
@@ -75,7 +74,7 @@ class TSetApp:
             if proword in self.wordlib:
                 TextVec[count] = self.wordlib[proword][1]
                 count = count + 1
-        return TextVec
+        return TextVec, texteval
 
 
 # Test code
