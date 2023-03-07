@@ -45,7 +45,7 @@ class TextClassifierRNN(nn.Module):
         # 设置嵌入层维度,单个训练集大小,输出层大小,rNN网络层数,隐藏层尺寸
         self.embedsize = 64
         self.batchsize = batchsize
-        self.outsize = 3
+        self.outsize = 7
         self.rnnlayers = 1
         self.hiddensize = self.embedsize
 
@@ -77,6 +77,7 @@ class TextClassifierRNN(nn.Module):
         return FinalOutput, Eval
 
 def TrainModel(Model,TSet):
+    Model.train()
     # 指定损失函数
     # 查了一下建议rNN用交叉熵损失函数，遂查文档抄之
     lossfunc = torch.nn.CrossEntropyLoss()
@@ -86,7 +87,9 @@ def TrainModel(Model,TSet):
     # 最后一个参数是个加权优化项，虽然是可选项但是先填个0.9进去看看效果
     optimizer = torch.optim.SGD(Model.parameters(), lr=0.01, momentum=0.9)
 
-    for i in range(int(TSet.reader.GetRowCount()/10)):
+    LogSys.Print("Train Begin...")
+    # int(TSet.reader.GetRowCount()/10)
+    for i in range(1):
         # 生成Batch的代码
         data = []
         Eval = []  # 标签数据
@@ -94,7 +97,7 @@ def TrainModel(Model,TSet):
         for i in range(Model.batchsize):
             temp, EvalNum = TSet.GetTextBatch()
             data.append(temp)
-            tempeval = [0, 0, 0]
+            tempeval = [0 for i in range(7)]
             tempeval[EvalNum] = 1
             Eval.append(tempeval)
 
@@ -113,10 +116,40 @@ def TrainModel(Model,TSet):
         # 打印下降程度
         LogSys.Print("Loss: " + str(round(float(loss.data[0]), 4)))
 
+    LogSys.Print("Train End")
+
+
+def TestModel(Model,TestSet):
+    # 关闭计算梯度，设置为测试模式
+    with torch.no_grad():
+        Model.eval()
+        # TestSet.reader.GetRowCount()
+        for i in range(1):
+            data = []
+            Eval = []  # 标签数据
+            for k in range(Model.batchsize):
+                temp, EvalNum = TestSet.GetTextBatch()
+                data.append(temp)
+                tempeval = [0 for i in range(7)]
+                tempeval[EvalNum] = 1
+                Eval.append(tempeval)
+
+            dataTen = torch.LongTensor(data)
+            EvalTen = torch.Tensor(Eval)
+
+            Output, Eval = Model(dataTen, EvalTen)  # Output为3维向量
+            for x in range(Model.batchsize):
+                count = 0
+                for k in range(7):
+                    if int(Eval[x][k]) == 1:
+                        count = k
+                LogSys.Print("Text {}'s classify accuracy: ".format(x+1)+str(round(float(Output[x][count]), 4)))
+
 
 
 # 创建模型
 test = TextClassifierRNN()
 TrainModel(test, Set)
+TestModel(test, TestSet)
 
 

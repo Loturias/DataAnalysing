@@ -62,7 +62,7 @@ class TSetApp:
     def GetTextBatch(self):
         row = (next(self.reader.reader))
         text = row[2]
-        texteval = Cour_Eff[row[4]]  # 0,1,2
+        texteval = TextType[row[3]]  # 0,1,2
         TextVec = [0 for i in range(self.textMaxLen)]  # Set the max length to 200
         count = 0
 
