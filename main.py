@@ -25,6 +25,8 @@ WordLib = json.load(fil)
 # 创建训练集管理器
 Set = TAPP.TSetApp(WordLib, r"DataLoader\Data\train.csv")
 
+# 测试集管理器
+TestSet = TAPP.TSetApp(WordLib, r"DataLoader\Data\test.csv")
 
 def setup_seed(seed):
     torch.manual_seed(seed)
@@ -57,21 +59,8 @@ class TextClassifierRNN(nn.Module):
         self.out = nn.Linear(self.hiddensize*Set.textMaxLen, self.outsize)
 
     # 前向传播
-    def forward(self, tem):
-        # 生成一个Batch
-        data = []
-        FinalEval = []
+    def forward(self, dataTen, Eval):
         smax = nn.Softmax(dim=1)
-
-        for i in range(self.batchsize):
-            temp, Eval = Set.GetTextBatch()
-            data.append(temp)
-            Evals = [0, 0, 0]
-            Evals[Eval] = 1
-            FinalEval.append(Evals)
-
-        dataTen = torch.LongTensor(data)
-
         embedData = self.embed(dataTen)  # 大小为10个文本*最大200个词向量*64维
 
         # 创建一个初始上下文给GRU使用
@@ -85,10 +74,49 @@ class TextClassifierRNN(nn.Module):
         # 喂给线性层出来10*7的结果，再过一遍Softmax函数归一化
         FinalOutput = smax(self.out(xoutput))  # 变成了10*7
 
-        print(FinalOutput)
-        print(FinalEval)
-        return FinalOutput, FinalEval
+        return FinalOutput, Eval
+
+def TrainModel(Model,TSet):
+    # 指定损失函数
+    # 查了一下建议rNN用交叉熵损失函数，遂查文档抄之
+    lossfunc = torch.nn.CrossEntropyLoss()
+
+    # 然后是优化器
+    # 都拆成10个一块的小Batch了当然用SGD
+    # 最后一个参数是个加权优化项，虽然是可选项但是先填个0.9进去看看效果
+    optimizer = torch.optim.SGD(Model.parameters(), lr=0.01, momentum=0.9)
+
+    for i in range(int(TSet.reader.GetRowCount()/10)):
+        # 生成Batch的代码
+        data = []
+        Eval = []  # 标签数据
+
+        for i in range(Model.batchsize):
+            temp, EvalNum = TSet.GetTextBatch()
+            data.append(temp)
+            tempeval = [0, 0, 0]
+            tempeval[EvalNum] = 1
+            Eval.append(tempeval)
+
+        dataTen = torch.LongTensor(data)  # 序列向量数据
+        EvalTen = torch.Tensor(Eval)
+
+        Output, Eval = Model(dataTen, EvalTen)  # 前向传播得到预测数据
+
+        optimizer.zero_grad()
+        loss = lossfunc(Output, Eval)
+        loss.backward()
+        optimizer.step()
+
+        loss = loss.expand(1)
+
+        # 打印下降程度
+        LogSys.Print("Loss: " + str(round(float(loss.data[0]), 4)))
+
+
 
 # 创建模型
 test = TextClassifierRNN()
+TrainModel(test, Set)
+
 

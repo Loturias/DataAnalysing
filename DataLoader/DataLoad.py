@@ -15,13 +15,18 @@ class CSVReader:
     def ReadLine(self):  # Return the next line's data from CSV as tuple
         return tuple(next(self.reader))
 
-
+    def GetRowCount(self):
+        self.file.seek(0)
+        res = sum(1 for _ in enumerate(self.reader)) - 1
+        self.file.seek(0)
+        return res
 # Test code
 
-# data = CSVReader("test.csv")
+
 
 # print(data.header)
 # for rowdata in data.reader:
 #    for info in rowdata:
 #         print(info, end=' ')
 #     print("")
+
