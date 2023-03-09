@@ -85,12 +85,32 @@ class TSetApp:
                 count = count + 1
         return TextVec, texteval
 
+    def CheckTextDistri(self):
+        TextTypeIn = {Type: 0 for Type in TextType}
+        count = self.reader.GetRowCount(IsTrain=False)
+        self.reader.SetDefault()
+        for i in range(count):
+            ty = next(self.reader.reader)[3]
+            TextTypeIn[ty] = TextTypeIn[ty] + 1
 
+        Num = sum(TextTypeIn[typ] for typ in TextTypeIn)
+        for typs in TextTypeIn:
+            print("Type "+typs+":"+str(round(TextTypeIn[typs]/Num,3)))
+        print(TextTypeIn)
 # Test code
 
 # lib = json.load(open("WordLib.json", "r"))
-# test = TSetApp(lib)
-# for i in range(10):
-#     batch = test.GetTextBatch()
-#    print(batch)
+# test = TSetApp(lib, "Data\\train.csv")
+# test.CheckTextDistri()
+
+
+"""
+Type Lead:0.062
+Type Position:0.109
+Type Claim:0.326
+Type Evidence:0.329
+Type Counterclaim:0.048
+Type Rebuttal:0.034
+Type Concluding Statement:0.091
+"""
 

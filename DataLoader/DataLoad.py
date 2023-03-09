@@ -24,7 +24,7 @@ class CSVReader:
                 if row[4] != "Ineffective":
                     res = res + 1
         else:
-            res = sum(1 for _ in enumerate(self.reader)) - 1
+            res = sum(1 for _ in enumerate(self.reader))
         self.file.seek(0)
         next(self.reader)  # 重置索引到第一行
         print("Valid row count: " + str(res))
