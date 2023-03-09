@@ -28,7 +28,7 @@ class TSetApp:
         rawseq = [0 for _ in range(self.squeMaxLen)]
         count = 0
         for word in seq.lower().split():
-            proword = word.replace(",", "").replace(".", "").replace("?","")
+            proword = word.replace(",", "").replace(".", "").replace("?"," ")
             if proword in self.wordlib:
                 try:
                     rawseq[count] = self.wordlib[proword][1]
@@ -59,17 +59,26 @@ class TSetApp:
         return Batch
 
     # Return a vector composed by word's raw code(Need processed by embedding layer
-    def GetTextBatch(self):
-        row = (next(self.reader.reader))
-        text = row[2]
-        texteval = TextType[row[3]]  # 0,1,2
-        TextVec = [0 for i in range(self.textMaxLen)]  # Set the max length to 200
-        count = 0
+    def GetTextBatch(self, IsTrain):
+        try:
+            row = 0
+            if IsTrain:
+                row = (next(self.reader.reader))
+                while row[4] == "Ineffective":
+                    row = (next(self.reader.reader))
+            else:
+                row = (next(self.reader.reader))
+            text = row[2]
+            texteval = TextType[row[3]]  # 0,1,2
+            TextVec = [0 for i in range(self.textMaxLen)]  # Set the max length to 200
+            count = 0
+        except StopIteration:
+            return
 
         RawTextVec = text.lower().replace("聽", " ").split(" ")  # Remove the invalid char
         for word in RawTextVec:
             proword = word.strip(".").strip(",")
-            if count >= 200:
+            if count >= self.textMaxLen:
                 break
             if proword in self.wordlib:
                 TextVec[count] = self.wordlib[proword][1]

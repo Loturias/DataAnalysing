@@ -15,12 +15,24 @@ class CSVReader:
     def ReadLine(self):  # Return the next line's data from CSV as tuple
         return tuple(next(self.reader))
 
-    def GetRowCount(self):
+    def GetRowCount(self, IsTrain):
         self.file.seek(0)
-        res = sum(1 for _ in enumerate(self.reader)) - 1
+        next(self.reader)
+        res = 0
+        if IsTrain:
+            for row in self.reader:
+                if row[4] != "Ineffective":
+                    res = res + 1
+        else:
+            res = sum(1 for _ in enumerate(self.reader)) - 1
         self.file.seek(0)
         next(self.reader)  # 重置索引到第一行
+        print("Valid row count: " + str(res))
         return res
+
+    def SetDefault(self):
+        self.file.seek(0)
+        next(self.reader)  # 重置索引到第一行
 # Test code
 
 
