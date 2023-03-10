@@ -1,9 +1,10 @@
 # Text processer
-
+import random
 
 import DataLoader.DataLoad as dL
 import LogSys.LogSys as Log
 import json
+import csv
 
 Cour_Eff = {"Effective": 0, "Adequate": 1, "Ineffective": 2}
 
@@ -114,3 +115,47 @@ Type Rebuttal:0.034
 Type Concluding Statement:0.091
 """
 
+
+def ClearData(lib):
+    f = open("Data\\clear_train.csv", "w", newline='')
+    RawTrain = TSetApp(lib, "Data\\train.csv")
+    writer = csv.writer(f)
+
+    writer.writerow(["discourse_id", "essay_id",
+                     "discourse_text", "discourse_type", "discourse_effectiveness"])
+
+    # 以最小的Rebuttal为基准，每组数据准备1000个
+    TypeCount = {key: 0 for key in TextType}
+
+    for row in RawTrain.reader.reader:
+        if TypeCount[row[3]] < 1000 and row[4] != "Ineffective":
+            writer.writerow(row)
+            TypeCount[row[3]] = TypeCount[row[3]] + 1
+
+    # 分布随机化
+    f.close()
+
+
+def DataRandomization(lib):
+    fp = open("Data\\final_train.csv", "w", newline='')
+    fpwriter = csv.writer(fp)
+    fpwriter.writerow(["discourse_id", "essay_id",
+                     "discourse_text", "discourse_type", "discourse_effectiveness"])
+
+    RawTrain = TSetApp(lib, "Data\\clear_train.csv")
+    datalis = list(RawTrain.reader.reader)
+
+    maxlen = len(datalis)
+    for i in range(maxlen):
+        count = random.randint(0, len(datalis)-1)
+        fpwriter.writerow(datalis[count])
+        datalis.pop(count)
+
+    fp.close()
+
+
+# ClearData(lib)
+# DataRandomization(lib)
+# lib = json.load(open("WordLib.json", "r"))
+# test2 = TSetApp(lib, "Data\\final_train.csv")
+# test2.CheckTextDistri()
