@@ -117,6 +117,9 @@ Type Concluding Statement:0.091
 
 
 def ClearData(lib):
+    TypeMax = {'Lead': 1000, 'Position': 1000, 'Claim': 1000, 'Evidence': 1000,
+            'Counterclaim': 1000, 'Rebuttal': 1000, 'Concluding Statement': 1000}
+
     f = open("Data\\clear_train.csv", "w", newline='')
     RawTrain = TSetApp(lib, "Data\\train.csv")
     writer = csv.writer(f)
@@ -128,10 +131,9 @@ def ClearData(lib):
     TypeCount = {key: 0 for key in TextType}
 
     for row in RawTrain.reader.reader:
-        if TypeCount[row[3]] < 1000 and row[4] != "Ineffective":
+        if TypeCount[row[3]] < TypeMax[row[3]] and row[4] != "Ineffective":
             writer.writerow(row)
             TypeCount[row[3]] = TypeCount[row[3]] + 1
-
     # 分布随机化
     f.close()
 
@@ -154,8 +156,10 @@ def DataRandomization(lib):
     fp.close()
 
 
+
+# lib = json.load(open("WordLib.json", "r"))
 # ClearData(lib)
 # DataRandomization(lib)
-# lib = json.load(open("WordLib.json", "r"))
 # test2 = TSetApp(lib, "Data\\final_train.csv")
 # test2.CheckTextDistri()
+# Log.Print("Data Refreshed.")
