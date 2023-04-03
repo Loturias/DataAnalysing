@@ -1,14 +1,9 @@
 # This is the inter subscript of whole project
 
-import os
-import random
-
-import DataLoader.TextProcesser
 import LogSys.LogSys as LogSys
 import json
 import DataLoader.TextProcesser as TAPP
 import numpy as np
-import datetime as dt
 import time
 
 TextType = {0: 'Lead',  1: 'Position', 2: 'Claim', 3: 'Evidence' ,
@@ -29,9 +24,6 @@ torch.device = "cuda"
 fil = open(r"DataLoader\WordLib.json", "r")
 WordLib = json.load(fil)
 
-# 创建训练集管理器
-
-# 测试集管理器
 
 def setup_seed(seed):
     torch.manual_seed(seed)
@@ -41,7 +33,7 @@ def setup_seed(seed):
 
 # 设置随机数种子，先辈保佑我准确率呀！
 
-se = 114514
+se = 1919810
 LogSys.Print("Random seed: " + str(se))
 setup_seed(se)
 
@@ -57,18 +49,10 @@ class TextClassifierRNN(nn.Module):
         self.rnnlayers = 1
         self.hiddensize = self.embedsize
 
-        # 设置嵌入层。
         self.embed = nn.Embedding(len(WordLib), self.embedsize)
-
         self.dp1 = torch.nn.ReLU()
-
-        # 使用PyTorch封装的GRU单元作为rNN层
         self.gru = nn.GRU(self.embedsize, self.hiddensize, batch_first=True, num_layers=self.rnnlayers)
-        #self.lstm = nn.LSTM(self.embedsize, self.hiddensize, batch_first=True)
-
         self.dp2 = torch.nn.RReLU()
-
-        # 用一个线性层作为输出层
         self.out = nn.Linear(self.hiddensize*Set.textMaxLen, self.outsize)
 
     # 前向传播
@@ -98,17 +82,16 @@ class TextClassifierRNN(nn.Module):
 def TrainModel(Model,TSet):
     Model.train()
     # 指定损失函数
-    # 查了一下建议rNN用交叉熵损失函数，遂查文档抄之
+    # 使用交叉熵损失函数
     lossfunc = torch.nn.CrossEntropyLoss()
 
     # 然后是优化器
     # 都拆成10个一块的小Batch了当然用SGD
     # 最后一个参数是个加权优化项，虽然是可选项但是先填个0.9进去看看效果
-    optimizer = torch.optim.SGD(Model.parameters(), lr=0.06, momentum=0.9)
+    optimizer = torch.optim.SGD(Model.parameters(), lr=0.05, momentum=0.9)
 
     LogSys.Print("Train Begin...")
     sttime = time.time()
-    # int(TSet.reader.GetRowCount()/10)
     for i in range(int(TSet.reader.GetRowCount(IsTrain=True)/Model.batchsize)):
         # 生成Batch的代码
         data = []
@@ -170,7 +153,6 @@ def TestModel(Model,TestSet):
                 LogSys.Print("Text {}'s classify accuracy: ".format(x+1)+str(round(float(Output[x][count]), 4))+" Text Type: "+TextType[count])
                 Su = Su + round(float(Output[x][count]), 4)
 
-            #print(Output)
             LogSys.Print("Average accuracy: " + str(round(Su/10, 2)))
             localtime = time.localtime(time.time())
             LogSys.Print("Training Date:{}/{} {}:{}".format(localtime.tm_mon, localtime.tm_mday, localtime.tm_hour, localtime.tm_min))
@@ -180,7 +162,9 @@ def TestModel(Model,TestSet):
 device = "cuda"
 LogSys.Print("Training Device: "+device)
 
+# 创建训练集管理器
 Set = TAPP.TSetApp(WordLib, r"DataLoader\Data\final_train.csv")
+# 测试集管理器
 TestSet = TAPP.TSetApp(WordLib, r"DataLoader\Data\test.csv")
 
 test = TextClassifierRNN(Set)
