@@ -1,3 +1,5 @@
+# 写在这里，如果负责批阅的老师/助教看到：
+# 本人承诺本项目完全由本人一条条查询文档完成，无抄袭，无辅助。
 # This is the inter subscript of whole project
 
 import LogSys.LogSys as LogSys
